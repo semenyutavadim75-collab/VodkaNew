@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Личный кабинет - VodkaClient</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Плавающая навигация */
+.floating-nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 25px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-radius: 20px;
+}
+
+.nav-logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #888;
+    letter-spacing: 1px;
+    margin-right: 15px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-links a:hover {
+    color: #fff;
+    background: rgba(80, 80, 80, 0.2);
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #3a3a3a, #555);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+/* Основной контейнер */
+.main-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 100px 30px 30px;
+}
+
+.cabinet-wrapper {
+    display: flex;
+    gap: 20px;
+    max-width: 1100px;
+    width: 100%;
+}
+
+/* Левая панель */
+.left-panel {
+    width: 420px;
+    background: rgba(25, 25, 25, 0.85);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(15px);
+}
+
+.balls-container {
+    position: relative;
+    height: 260px;
+    background: linear-gradient(180deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%);
+    overflow: hidden;
+}
+
+#ballsCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+.balls-label {
+    position: absolute;
+    top: 12px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: #666;
+}
+
+/* Профиль */
+.profile-section {
+    padding: 25px;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    border: 3px solid rgba(80, 80, 80, 0.5);
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-details h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.uid-badge {
+    background: rgba(80, 80, 80, 0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: #888;
+}
+
+.subscription-date {
+    color: #777;
+    font-size: 13px;
+}
+
+.subscription-date span {
+    color: #aaa;
+}
+
+/* Кнопка Download - темная с блюром */
+.btn-download {
+    width: 100%;
+    padding: 14px;
+    background: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(80, 80, 80, 0.2);
+    border-radius: 20px;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-download:hover {
+    background: rgba(40, 40, 40, 0.8);
+    border-color: rgba(80, 80, 80, 0.4);
+}
+
+.btn-download.active {
+    background: rgba(50, 50, 50, 0.8);
+    border: 1px solid rgba(100, 100, 100, 0.4);
+    color: #aaa;
+}
+
+/* Правая панель */
+.right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-panel {
+    background: rgba(25, 25, 25, 0.85);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(15px);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #777;
+    font-size: 14px;
+}
+
+.info-value {
+    background: rgba(30, 30, 30, 0.9);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #ddd;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.info-value.status {
+    background: rgba(80, 80, 80, 0.2);
+    color: #aaa;
+}
+
+.info-value.hwid {
+    font-family: monospace;
+    font-size: 11px;
+    color: #888;
+}
+
+/* Actions */
+.actions-panel {
+    background: rgba(25, 25, 25, 0.85);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(15px);
+}
+
+.actions-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.action-card {
+    text-align: center;
+}
+
+.action-card label {
+    display: block;
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(80, 80, 80, 0.15);
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 20px;
+    color: #aaa;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.action-btn:hover {
+    background: rgba(80, 80, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Кнопка выхода */
+.logout-btn {
+    padding: 12px;
+    background: rgba(255, 50, 50, 0.1);
+    border: 1px solid rgba(255, 50, 50, 0.25);
+    border-radius: 20px;
+    color: #ff6b6b;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: auto;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 50, 50, 0.2);
+}
+
+/* Модальные окна */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: rgba(25, 25, 25, 0.98);
+    border: 1px solid rgba(80, 80, 80, 0.4);
+    border-radius: 20px;
+    padding: 30px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 20px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: #888;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.modal-btn.primary {
+    background: linear-gradient(135deg, #3a3a3a, #555);
+    border: none;
+    color: #fff;
+}
+
+.modal-btn.secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #888;
+}
+
+.modal-message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: none;
+}
+
+.loading {
+    text-align: center;
+    padding: 100px 20px;
+    font-size: 18px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Плавающая навигация -->
+<nav class="floating-nav">
+    <div class="nav-logo">VodkaClient</div>
+    <div class="nav-links">
+        <a href="/">🏠 Home</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank" style="margin-left: -8px;">💬 Support</a>
+    </div>
+    <div class="nav-user" id="navUser">
+        <span>👤</span>
+        <span id="navUsername">username</span>
+    </div>
+</nav>
+
+<div class="main-container">
+    <div id="loadingMessage" class="loading">Загрузка...</div>
+
+    <div class="cabinet-wrapper" id="cabinetContent" style="display: none;">
+        <!-- Левая панель -->
+        <div class="left-panel">
+            <div class="balls-container">
+                <canvas id="ballsCanvas"></canvas>
+                <div class="balls-label">⚙ balls.tsx</div>
+            </div>
+            
+            <div class="profile-section">
+                <div class="profile-info">
+                    <div class="avatar">
+                        <img src="logo.png" alt="Avatar" id="avatarImg">
+                    </div>
+                    <div class="profile-details">
+                        <h2>
+                            <span id="usernameDisplay">username</span>
+                            <span class="uid-badge">UID: <span id="uidDisplay">0</span></span>
+                        </h2>
+                        <div class="subscription-date">
+                            Subscription: <span id="subscriptionDisplay">Не активна</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn-download" id="downloadBtn">Download Loader</button>
+            </div>
+        </div>
+        
+        <!-- Правая панель -->
+        <div class="right-panel">
+            <div class="info-panel">
+                <div class="info-row">
+                    <div class="info-label">👤 Username:</div>
+                    <div class="info-value" id="infoUsername">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">✉ E-Mail:</div>
+                    <div class="info-value" id="infoEmail">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">⏰ Subscription:</div>
+                    <div class="info-value" id="infoSubscription">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">💻 HWID:</div>
+                    <div class="info-value hwid" id="infoHwid">Не привязан</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">⚡ Role:</div>
+                    <div class="info-value status" id="infoRole">User</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">⭐ Beta Access:</div>
+                    <div class="info-value" id="infoBeta">Нет</div>
+                </div>
+            </div>
+            
+            <div class="actions-panel">
+                <div class="actions-title">Actions</div>
+                <div class="actions-grid">
+                    <div class="action-card">
+                        <label>Configure RAM</label>
+                        <button class="action-btn" onclick="openModal('ram')">Configure</button>
+                    </div>
+                    <div class="action-card">
+                        <label>Activate Key</label>
+                        <button class="action-btn" onclick="openModal('key')">Activate</button>
+                    </div>
+                    <div class="action-card">
+                        <label>Change Avatar</label>
+                        <button class="action-btn" onclick="openModal('avatar')">Change</button>
+                    </div>
+                </div>
+                <button class="action-btn" onclick="openModal('password')" style="width: 100%; margin-top: 15px;">🔑 Сменить пароль</button>
+            </div>
+            
+            <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальные окна -->
+<div class="modal" id="keyModal">
+    <div class="modal-content">
+        <div class="modal-title">Активация ключа</div>
+        <input type="text" class="modal-input" id="keyInput" placeholder="VDK-XXXXXXXX-XXXXXXXX">
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('key')">Отмена</button>
+            <button class="modal-btn primary" onclick="activateKey()">Активировать</button>
+        </div>
+        <div class="modal-message" id="keyMessage"></div>
+    </div>
+</div>
+
+<div class="modal" id="passwordModal">
+    <div class="modal-content">
+        <div class="modal-title">Смена пароля</div>
+        <input type="password" class="modal-input" id="oldPassword" placeholder="Текущий пароль">
+        <input type="password" class="modal-input" id="newPassword" placeholder="Новый пароль (мин. 6 символов)">
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('password')">Отмена</button>
+            <button class="modal-btn primary" onclick="changePassword()">Сменить</button>
+        </div>
+        <div class="modal-message" id="passwordMessage"></div>
+    </div>
+</div>
+
+<div class="modal" id="ramModal">
+    <div class="modal-content">
+        <div class="modal-title">Настройка RAM</div>
+        <input type="number" class="modal-input" id="ramInput" placeholder="GB (2-16)" min="2" max="16" value="4">
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('ram')">Отмена</button>
+            <button class="modal-btn primary" onclick="saveRam()">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="avatarModal">
+    <div class="modal-content">
+        <div class="modal-title">Смена аватара</div>
+        <p style="color: #666; margin-bottom: 15px;">Функция в разработке</p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('avatar')">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<!-- Скрытая админ авторизация (Alt+N) -->
+<div class="modal" id="adminModal">
+    <div class="modal-content" style="border-color: rgba(255, 50, 50, 0.4);">
+        <div class="modal-title" style="color: #ff6b6b;">🔐 Admin Access</div>
+        <input type="password" class="modal-input" id="adminPassword" placeholder="Введите пароль администратора" style="border-color: rgba(255, 50, 50, 0.3);">
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('admin')">Отмена</button>
+            <button class="modal-btn primary" onclick="adminLogin()" style="background: linear-gradient(135deg, #dc2626, #ef4444);">Войти</button>
+        </div>
+        <div class="modal-message" id="adminMessage"></div>
+    </div>
+</div>
+
+<script>
+let userData = null;
+let adminAuthorized = localStorage.getItem('adminAuth') === 'true';
+</script>
+
+<script>
+// ========== ЗАГРУЗКА ДАННЫХ ==========
+async function loadUserData() {
+    try {
+        const response = await fetch('/api/check-auth');
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+            window.location.href = '/';
+            return;
+        }
+        
+        userData = data;
+        
+        document.getElementById('usernameDisplay').textContent = data.username;
+        document.getElementById('navUsername').textContent = data.username;
+        document.getElementById('uidDisplay').textContent = data.uid;
+        
+        document.getElementById('infoUsername').textContent = data.username;
+        document.getElementById('infoEmail').textContent = data.email || 'Не указан';
+        document.getElementById('infoHwid').textContent = data.hwid ? data.hwid.substring(0, 20) + '...' : 'Не привязан';
+        
+        if (data.subscription_active) {
+            const expires = new Date(data.subscription_expires);
+            const dateStr = expires.toLocaleDateString('ru-RU') + ' ' + expires.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            document.getElementById('subscriptionDisplay').textContent = dateStr;
+            document.getElementById('infoSubscription').textContent = dateStr;
+            
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.classList.add('active');
+            downloadBtn.textContent = '📥 Download Loader';
+        } else {
+            document.getElementById('subscriptionDisplay').textContent = 'Не активна';
+            document.getElementById('infoSubscription').textContent = 'Не активна';
+        }
+        
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('cabinetContent').style.display = 'flex';
+        
+        initBalls();
+        animate();
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        window.location.href = '/';
+    }
+}
+
+// ========== МОДАЛЬНЫЕ ОКНА ==========
+function openModal(type) {
+    document.getElementById(type + 'Modal').classList.add('active');
+}
+
+function closeModal(type) {
+    document.getElementById(type + 'Modal').classList.remove('active');
+}
+
+async function activateKey() {
+    const keyCode = document.getElementById('keyInput').value.trim();
+    const messageDiv = document.getElementById('keyMessage');
+    
+    if (!keyCode) { showMessage(messageDiv, 'Введите ключ', false); return; }
+    
+    try {
+        const response = await fetch('/api/activate-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_code: keyCode })
+        });
+        const data = await response.json();
+        showMessage(messageDiv, data.message, data.success);
+        
+        if (data.success) {
+            document.getElementById('keyInput').value = '';
+            setTimeout(() => { closeModal('key'); loadUserData(); }, 1500);
+        }
+    } catch (error) { showMessage(messageDiv, 'Ошибка соединения', false); }
+}
+
+async function changePassword() {
+    const oldPass = document.getElementById('oldPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const messageDiv = document.getElementById('passwordMessage');
+    
+    if (!oldPass || !newPass) { showMessage(messageDiv, 'Заполните все поля', false); return; }
+    
+    try {
+        const response = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ old_password: oldPass, new_password: newPass })
+        });
+        const data = await response.json();
+        showMessage(messageDiv, data.message, data.success);
+        if (data.success) {
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            setTimeout(() => closeModal('password'), 1500);
+        }
+    } catch (error) { showMessage(messageDiv, 'Ошибка соединения', false); }
+}
+
+function saveRam() {
+    const ram = document.getElementById('ramInput').value;
+    localStorage.setItem('vodka_ram', ram);
+    closeModal('ram');
+    alert('RAM сохранено: ' + ram + ' GB');
+}
+
+function showMessage(div, text, success) {
+    div.style.display = 'block';
+    div.style.background = success ? 'rgba(50, 255, 50, 0.2)' : 'rgba(255, 50, 50, 0.2)';
+    div.style.color = success ? '#55ff55' : '#ff5555';
+    div.textContent = text;
+}
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+    if (userData && userData.subscription_active) {
+        window.open('https://www.dropbox.com/scl/fi/2zbuk1s0opsmjl21zrsd3/VodkaClient.exe?rlkey=vt6dzy7evnbxr8rosnidyyaio&st=caeou3b8&dl=1', '_blank');
+    } else { alert('Нужна активная подписка'); }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/';
+});
+
+// ========== ШАРИКИ КАК НА KLERPIK ==========
+const canvas = document.getElementById('ballsCanvas');
+const ctx = canvas.getContext('2d');
+
+let balls = [];
+let ballMouseX = 0, ballMouseY = 0;
+
+const colors = [
+    '#555', '#666', '#777', '#888', '#999', '#aaa',
+    '#444', '#333', '#5a5a5a', '#6b6b6b'
+];
+
+function initBalls() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    balls = [];
+    const count = 60; // Много шариков как на скрине
+    
+    for (let i = 0; i < count; i++) {
+        const radius = Math.random() * 12 + 8; // 8-20px
+        balls.push({
+            x: Math.random() * canvas.width,
+            y: canvas.height - radius - Math.random() * 150, // Внизу
+            vx: 0,
+            vy: 0,
+            radius: radius,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            mass: radius
+        });
+    }
+}
+
+function drawBall(ball) {
+    // Основной круг
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = ball.color;
+    ctx.fill();
+    
+    // Блик сверху-слева (как на скрине)
+    ctx.beginPath();
+    ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.35, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fill();
+    
+    // Маленький блик
+    ctx.beginPath();
+    ctx.arc(ball.x - ball.radius * 0.15, ball.y - ball.radius * 0.45, ball.radius * 0.12, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fill();
+}
+
+function updateBalls() {
+    const gravity = 0.15;
+    const friction = 0.95;
+    const bounce = 0.3;
+    const w = canvas.width;
+    const h = canvas.height;
+    
+    for (let ball of balls) {
+        // Гравитация
+        ball.vy += gravity;
+        
+        // Сильное трение чтобы быстро успокаивались
+        ball.vx *= friction;
+        ball.vy *= friction;
+        
+        // Движение
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        
+        // УЛУЧШЕННОЕ отталкивание при наведении мышки - СИЛЬНЕЕ ПОДПРЫГИВАЮТ
+        const dx = ball.x - ballMouseX;
+        const dy = ball.y - ballMouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < 50 + ball.radius && dist > 0) {
+            // Подкидываем СИЛЬНЕЕ вверх и в сторону
+            const force = (50 + ball.radius - dist) / 20; // Чем ближе, тем сильнее
+            ball.vx += (dx / dist) * force * 1.5;
+            ball.vy -= force * 2.5; // Подкидываем вверх сильнее
+        }
+        
+        // Границы
+        if (ball.x - ball.radius < 0) {
+            ball.x = ball.radius;
+            ball.vx *= -bounce;
+        }
+        if (ball.x + ball.radius > w) {
+            ball.x = w - ball.radius;
+            ball.vx *= -bounce;
+        }
+        if (ball.y - ball.radius < 0) {
+            ball.y = ball.radius;
+            ball.vy *= -bounce;
+        }
+        if (ball.y + ball.radius > h) {
+            ball.y = h - ball.radius;
+            ball.vy *= -bounce;
+        }
+    }
+    
+    // Коллизии между шариками (упрощённые)
+    for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+            const b1 = balls[i], b2 = balls[j];
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const minDist = b1.radius + b2.radius;
+            
+            if (dist < minDist && dist > 0) {
+                const overlap = (minDist - dist) / 2;
+                const nx = dx / dist;
+                const ny = dy / dist;
+                
+                b1.x -= nx * overlap;
+                b1.y -= ny * overlap;
+                b2.x += nx * overlap;
+                b2.y += ny * overlap;
+                
+                // Обмен скоростями
+                const dvx = b1.vx - b2.vx;
+                const dvy = b1.vy - b2.vy;
+                const dvn = dvx * nx + dvy * ny;
+                
+                if (dvn > 0) {
+                    const m1 = b1.mass, m2 = b2.mass;
+                    const f = dvn / (m1 + m2) * 0.8;
+                    b1.vx -= f * m2 * nx;
+                    b1.vy -= f * m2 * ny;
+                    b2.vx += f * m1 * nx;
+                    b2.vy += f * m1 * ny;
+                }
+            }
+        }
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updateBalls();
+    balls.forEach(drawBall);
+    requestAnimationFrame(animate);
+}
+
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    ballMouseX = e.clientX - rect.left;
+    ballMouseY = e.clientY - rect.top;
+});
+
+window.addEventListener('resize', () => {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+});
+
+// ========== АДМИН АВТОРИЗАЦИЯ (Alt+N) ==========
+document.addEventListener('keydown', (e) => {
+    if (e.altKey && (e.key === 'n' || e.key === 'N' || e.key === 'т' || e.key === 'Т')) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (adminAuthorized) {
+            window.location.href = '/admin.html';
+        } else {
+            openModal('admin');
+            setTimeout(() => document.getElementById('adminPassword').focus(), 100);
+        }
+    }
+});
+
+function adminLogin() {
+    const password = document.getElementById('adminPassword').value;
+    const messageDiv = document.getElementById('adminMessage');
+    const ADMIN_PASSWORD = 'vodka2024admin';
+    
+    if (password === ADMIN_PASSWORD) {
+        adminAuthorized = true;
+        localStorage.setItem('adminAuth', 'true');
+        showMessage(messageDiv, 'Доступ разрешен!', true);
+        setTimeout(() => { window.location.href = '/admin.html'; }, 500);
+    } else {
+        showMessage(messageDiv, 'Неверный пароль', false);
+        document.getElementById('adminPassword').value = '';
+    }
+}
+
+document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') adminLogin();
+});
+
+// Запуск
+loadUserData();
+</script>
+
+</body>
+</html>
